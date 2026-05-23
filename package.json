@@ -1,0 +1,13 @@
+{
+  "name": "botcityrs-scripts",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "bun run src/tools/build.ts",
+    "test": "bun run src/tools/validate.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}
