@@ -1,0 +1,45 @@
+name: CDN Scripts
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build and validate scripts
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Build CDN scripts
+        run: bun run build
+
+      - name: Validate CDN manifest
+        run: bun run test
+
+      - name: Prepare GitHub Pages artifact
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          rm -rf .pages
+          mkdir -p .pages
+          cp manifest.json .pages/manifest.json
+          cp -R scripts .pages/scripts
+          touch .pages/.nojekyll
+
+      - name: Publish GitHub Pages branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: .pages

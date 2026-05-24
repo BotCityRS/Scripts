@@ -82,9 +82,9 @@ https://botcityrs.github.io/Scripts/manifest.json
    }
    ```
 
-4. Commit and push the source and generated CDN files.
+4. Commit and push the source changes.
 
-   GitHub Pages serves this repository directly, so keep `manifest.json` and `scripts/*.js` committed.
+   Pull requests run the GitHub Actions build and validation workflow. After changes merge to `main`, the same workflow builds the CDN files and publishes them to the `gh-pages` branch.
 
 ## Runtime Notes
 
@@ -103,7 +103,7 @@ bun run build
 bun run test
 ```
 
-After pushing, confirm GitHub Pages can serve the manifest:
+Pull requests run the same checks automatically. After a merge to `main`, confirm GitHub Pages can serve the manifest:
 
 ```sh
 curl https://botcityrs.github.io/Scripts/manifest.json
