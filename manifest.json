@@ -2,11 +2,6 @@
   "schemaVersion": 2,
   "scripts": [
     {
-      "name": "AutoKiller",
-      "moduleUrl": "./scripts/AutoKiller.js",
-      "exportName": "default"
-    },
-    {
       "name": "AutoFisher",
       "moduleUrl": "./scripts/AutoFisher.js",
       "exportName": "default"
@@ -17,6 +12,16 @@
       "exportName": "default"
     },
     {
+      "name": "AutoKiller",
+      "moduleUrl": "./scripts/AutoKiller.js",
+      "exportName": "default"
+    },
+    {
+      "name": "AutoWalker",
+      "moduleUrl": "./scripts/AutoWalker.js",
+      "exportName": "default"
+    },
+    {
       "name": "AutoWoodcutter",
       "moduleUrl": "./scripts/AutoWoodcutter.js",
       "exportName": "default"
@@ -24,11 +29,6 @@
     {
       "name": "LumbyThievSuicide",
       "moduleUrl": "./scripts/LumbyThievSuicide.js",
-      "exportName": "default"
-    },
-    {
-      "name": "AutoWalker",
-      "moduleUrl": "./scripts/AutoWalker.js",
       "exportName": "default"
     },
     {
