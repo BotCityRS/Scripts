@@ -35,7 +35,7 @@ export default class PathRecorder extends BotScript {
     private toId: WalkNodeId;
 
     constructor(fromId: WalkNodeId = 'hub_lumbridge', toId: WalkNodeId = 'bank_al_kharid') {
-        super('PathRecorder', false, true);
+        super('PathRecorder', false, { author: 'j', version: '1.0.0', isDebugScript: true });
         this.fromId = fromId;
         this.toId = toId;
     }

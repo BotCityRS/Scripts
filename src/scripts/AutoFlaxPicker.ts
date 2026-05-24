@@ -1,9 +1,6 @@
-import { MiniMenuAction } from '../runtime/actions';
 import type { WorldObjectEntity } from '../runtime/types';
-import type { InvInterfaceItem } from '../runtime/types';
 import type { Path } from '../runtime/types';
 import Timer from '../runtime/Timer';
-import Utility from '../runtime/Utility';
 import type { Bot } from '../runtime/types';
 import BotScript from '../runtime/BotScript';
 
@@ -85,19 +82,11 @@ function findPickableFlax(
     anchor: [number, number],
     anchorMaxDist: number
 ): WorldObjectEntity | null {
-    const candidates = api.worldObject.getById([ID_FLAX_GROUND]);
+    const candidates = api.worldObject.getNear(anchor[0], anchor[1], anchorMaxDist, [ID_FLAX_GROUND]);
     let best: WorldObjectEntity | null = null;
     let bestSteps = Number.POSITIVE_INFINITY;
-    const baseX = api.surface.sceneBaseTileX;
-    const baseZ = api.surface.sceneBaseTileZ;
     for (let i = 0; i < candidates.length; i++) {
         const wo = candidates[i]!;
-        const wx = wo.x + baseX;
-        const wz = wo.z + baseZ;
-        const da = Utility.getDistance(wx, wz, anchor[0], anchor[1]);
-        if (da > anchorMaxDist) {
-            continue;
-        }
         const steps = api.worldObject.getPathfindSteps(wo);
         if (steps < 0 || steps > FLAX_PATHFIND_MAX_STEPS) {
             continue;
@@ -108,70 +97,6 @@ function findPickableFlax(
         }
     }
     return best;
-}
-
-function findWorldObjectNearTile(
-    api: Bot['api'],
-    ids: number[],
-    worldX: number,
-    worldZ: number,
-    maxDist: number = WORLD_OBJECT_TILE_TOLERANCE
-): WorldObjectEntity | null {
-    const baseX = api.surface.sceneBaseTileX;
-    const baseZ = api.surface.sceneBaseTileZ;
-    const candidates = api.worldObject.getById(ids);
-    let best: WorldObjectEntity | null = null;
-    let bestDist = maxDist + 1;
-    for (let i = 0; i < candidates.length; i++) {
-        const wo = candidates[i]!;
-        const wx = wo.x + baseX;
-        const wz = wo.z + baseZ;
-        const d = Utility.getDistance(wx, wz, worldX, worldZ);
-        if (d <= maxDist && d < bestDist) {
-            bestDist = d;
-            best = wo;
-        }
-    }
-    return best;
-}
-
-/** Prefer reachable locs near a world tile (pathfind), then nearest by id. */
-function findReachableWorldObjectNearTile(
-    api: Bot['api'],
-    ids: number[],
-    worldX: number,
-    worldZ: number,
-    maxDist: number = WORLD_OBJECT_TILE_TOLERANCE,
-    maxSteps: number = FLAX_PATHFIND_MAX_STEPS
-): WorldObjectEntity | null {
-    const baseX = api.surface.sceneBaseTileX;
-    const baseZ = api.surface.sceneBaseTileZ;
-    const candidates = api.worldObject.getById(ids);
-    let best: WorldObjectEntity | null = null;
-    let bestSteps = Number.POSITIVE_INFINITY;
-    for (let i = 0; i < candidates.length; i++) {
-        const wo = candidates[i]!;
-        const wx = wo.x + baseX;
-        const wz = wo.z + baseZ;
-        if (Utility.getDistance(wx, wz, worldX, worldZ) > maxDist) {
-            continue;
-        }
-        const steps = api.worldObject.getPathfindSteps(wo);
-        if (steps < 0 || steps > maxSteps) {
-            continue;
-        }
-        if (steps < bestSteps) {
-            bestSteps = steps;
-            best = wo;
-        }
-    }
-    return best;
-}
-
-function useItemOnWorldObject(api: Bot['api'], item: InvInterfaceItem, wo: WorldObjectEntity): void {
-    const lx = wo.typecode & 0x7f;
-    const lz = (wo.typecode >> 7) & 0x7f;
-    void api.doAction(MiniMenuAction.USEHELD_ONLOC, wo.typecode, lx, lz);
 }
 
 export default class AutoFlaxPicker extends BotScript {
@@ -208,7 +133,7 @@ export default class AutoFlaxPicker extends BotScript {
     ];
 
     constructor(spotIndex = 0, spinEnabled = false) {
-        super('AutoFlaxPicker', false);
+        super('AutoFlaxPicker', false, { author: 'j', version: '1.0.0' });
         this.timer = new Timer();
         this.spinEnabled = spinEnabled;
         const i = Math.max(0, Math.min(spotIndex, AutoFlaxPicker.spots.length - 1));
@@ -219,7 +144,7 @@ export default class AutoFlaxPicker extends BotScript {
         this.timer.defineTimer('TIMER_SPIN_USE', TIMER_SPIN_USE);
     }
 
-    static htmlSetup(base: HTMLElement) {
+    static override htmlSetup(base: HTMLElement) {
         const desc = document.createElement('p');
         desc.className = 'bot-description';
         desc.textContent =
@@ -239,7 +164,7 @@ export default class AutoFlaxPicker extends BotScript {
         );
     }
 
-    static buildFromHtml(_base: HTMLElement) {
+    static override buildFromHtml(_base: HTMLElement) {
         return new AutoFlaxPicker(0, getChecked('afpSpin'));
     }
 
@@ -281,7 +206,12 @@ export default class AutoFlaxPicker extends BotScript {
         if (!this.isNearSpinDoor(api)) {
             return false;
         }
-        const closedDoor = findWorldObjectNearTile(api, [ID_DOOR_CLOSED], SEERS_SPIN_DOOR[0], SEERS_SPIN_DOOR[1]);
+        const closedDoor = api.worldObject.getNear(
+            SEERS_SPIN_DOOR[0],
+            SEERS_SPIN_DOOR[1],
+            WORLD_OBJECT_TILE_TOLERANCE,
+            [ID_DOOR_CLOSED]
+        )[0] ?? null;
         if (!closedDoor) {
             return false;
         }
@@ -310,7 +240,7 @@ export default class AutoFlaxPicker extends BotScript {
         }
         this.pendingSpinWheel = wheel;
         this.spinUseStep = 'need_use_on_wheel';
-        void api.doAction(MiniMenuAction.USEHELD_START, flax.id, flax.slot, flax.interfaceId);
+        flax.use();
         this.timer.setTimer(TIMER_SPIN_USE, 120);
         this.timer.setTimer(TIMER_GAME_INTERACT, 400);
         return true;
@@ -328,7 +258,7 @@ export default class AutoFlaxPicker extends BotScript {
             if (wheel) {
                 const flax = api.inventory.getItemById(ID_FLAX);
                 if (flax) {
-                    useItemOnWorldObject(api, flax, wheel);
+                    wheel.useItem(flax);
                 }
             }
             this.spinUseStep = 'idle';
@@ -344,12 +274,9 @@ export default class AutoFlaxPicker extends BotScript {
                     return true;
                 }
                 const wheel =
-                    findReachableWorldObjectNearTile(
-                        api,
-                        [ID_SPINNING_WHEEL],
-                        SEERS_SPIN_WHEEL[0],
-                        SEERS_SPIN_WHEEL[1]
-                    ) ?? api.worldObject.getNearestByIdPath([ID_SPINNING_WHEEL], FLAX_PATHFIND_MAX_STEPS);
+                    api.worldObject.getNear(SEERS_SPIN_WHEEL[0], SEERS_SPIN_WHEEL[1], WORLD_OBJECT_TILE_TOLERANCE, [ID_SPINNING_WHEEL])
+                        .find((wo: WorldObjectEntity) => wo.isReachable(FLAX_PATHFIND_MAX_STEPS)) ??
+                    api.worldObject.getNearestByIdPath([ID_SPINNING_WHEEL], FLAX_PATHFIND_MAX_STEPS);
                 if (wheel) {
                     this.beginSpinFlax(api, wheel);
                 }
@@ -357,7 +284,8 @@ export default class AutoFlaxPicker extends BotScript {
             }
 
             const ladderDown =
-                findReachableWorldObjectNearTile(api, [ID_LADDER_DOWN], SEERS_SPIN_LADDER[0], SEERS_SPIN_LADDER[1]) ??
+                api.worldObject.getNear(SEERS_SPIN_LADDER[0], SEERS_SPIN_LADDER[1], WORLD_OBJECT_TILE_TOLERANCE, [ID_LADDER_DOWN])
+                    .find((wo: WorldObjectEntity) => wo.isReachable(FLAX_PATHFIND_MAX_STEPS)) ??
                 api.worldObject.getNearestByIdPath([ID_LADDER_DOWN], FLAX_PATHFIND_MAX_STEPS);
 
             const ladderDist = api.world.distanceTo(SEERS_SPIN_LADDER[0], SEERS_SPIN_LADDER[1]);
@@ -389,7 +317,12 @@ export default class AutoFlaxPicker extends BotScript {
             return true;
         }
 
-        const ladderUp = findWorldObjectNearTile(api, [ID_LADDER_UP], SEERS_SPIN_LADDER[0], SEERS_SPIN_LADDER[1]);
+        const ladderUp = api.worldObject.getNear(
+            SEERS_SPIN_LADDER[0],
+            SEERS_SPIN_LADDER[1],
+            WORLD_OBJECT_TILE_TOLERANCE,
+            [ID_LADDER_UP]
+        )[0] ?? null;
         if (ladderUp && api.world.distanceTo(SEERS_SPIN_LADDER[0], SEERS_SPIN_LADDER[1]) <= 6) {
             this.timer.setTimer(TIMER_GAME_INTERACT, 1600);
             ladderUp.interact(LADDER_OP);

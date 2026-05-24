@@ -116,7 +116,7 @@ export default class AutoFisher extends BotScript {
     location: FishLocation;
 
     constructor(locationId = 0) {
-        super('AutoFisher', false)
+        super('AutoFisher', false, { author: 'j', version: '1.0.0' })
         this.timer = new Timer();
         this.location = AutoFisher.locations[locationId];
 

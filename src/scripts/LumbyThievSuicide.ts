@@ -36,7 +36,7 @@ export default class LumbyThievSuicide extends BotScript {
     pickupCoins: boolean;
 
     constructor(pickupCoins = true) {
-        super('LumbyThievSuicide', false);
+        super('LumbyThievSuicide', false, { author: 'j', version: '1.0.0' });
         this.timer = new Timer();
         this.pickupCoins = pickupCoins;
 

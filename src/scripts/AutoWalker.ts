@@ -46,7 +46,7 @@ export default class AutoWalker extends BotScript {
     traverse: boolean;
 
     constructor(routeIndex = 0, traverse = true) {
-        super('AutoWalker', false);
+        super('AutoWalker', false, { author: 'j', version: '1.0.0' });
         this.timer = new Timer();
         const route = HUB_ROUTE_OPTIONS[routeIndex] ?? HUB_ROUTE_OPTIONS[0]!;
         this.fromNode = route.from;

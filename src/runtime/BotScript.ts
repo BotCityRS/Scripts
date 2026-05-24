@@ -1,14 +1,24 @@
 import type { Bot } from './types';
 
+export type BotScriptMetadata = {
+  author: string;
+  version: string;
+  isDebugScript?: boolean;
+};
+
 export default class BotScript {
   name: string;
+  author: string;
+  version: string;
   isSystemScript: boolean;
   isDebugScript: boolean;
 
-  constructor(name: string, isSystemScript: boolean, isDebugScript = false) {
+  constructor(name: string, isSystemScript: boolean, metadata: BotScriptMetadata) {
     this.name = name;
+    this.author = metadata.author;
+    this.version = metadata.version;
     this.isSystemScript = isSystemScript;
-    this.isDebugScript = isDebugScript;
+    this.isDebugScript = metadata.isDebugScript ?? false;
   }
 
   start(_bot: Bot): void {}

@@ -25,7 +25,7 @@ https://botcityrs.github.io/Scripts/manifest.json
      private timer = new Timer();
 
      constructor() {
-       super('MyNewScript', false);
+       super('MyNewScript', false, { author: '', version: '1.0.0' });
        this.timer.defineTimer('TIMER_GAME_INTERACT', TIMER_GAME_INTERACT);
      }
 
@@ -60,7 +60,7 @@ https://botcityrs.github.io/Scripts/manifest.json
    bun run test
    ```
 
-   `bun run build` automatically discovers every `.ts` file in `src/scripts/`, builds it, and writes a manifest entry using the file name. Keep the file name, class name, and `super('<ScriptName>', false)` value aligned so the dropdown label and module name stay predictable.
+   `bun run build` automatically discovers every `.ts` file in `src/scripts/`, builds it, and writes a manifest entry using the file name. Keep the file name, class name, and `super('<ScriptName>', false, { author, version })` value aligned so the dropdown label and module name stay predictable.
 
    The build writes:
 
@@ -91,8 +91,8 @@ https://botcityrs.github.io/Scripts/manifest.json
 - CDN scripts run in the browser and interact with the game through `bot.api`.
 - Use helpers from `src/runtime/` for shared script-side code such as `BotScript`, `Timer`, menu action constants, and walk route labels.
 - Keep script constructors no-argument or provide safe defaults. The loader may instantiate a script just to inspect metadata.
-- `super('<ScriptName>', false)` marks the script as CDN-provided instead of bundled system code.
-- Set the third `BotScript` constructor argument to `true` only for debug-only scripts.
+- `super('<ScriptName>', false, { author, version })` marks the script as CDN-provided instead of bundled system code and records required script metadata.
+- Set `isDebugScript: true` in the metadata object only for debug-only scripts.
 
 ## Publish Checklist
 
