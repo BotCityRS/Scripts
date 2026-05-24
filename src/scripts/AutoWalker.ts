@@ -1,5 +1,5 @@
 import Timer from '../runtime/Timer';
-import { reversePath, HUB_ROUTE_OPTIONS } from '../runtime/walk';
+import { HUB_ROUTE_OPTIONS } from '../runtime/walk';
 import type { WalkNodeId } from '../runtime/types';
 import type { Bot } from '../runtime/types';
 import BotScript from '../runtime/BotScript';
@@ -111,8 +111,7 @@ export default class AutoWalker extends BotScript {
                 api.bot.log('WARN', 'AutoWalker', 'no planned route', { from, to });
                 return;
             }
-            const path = this.traverse ? planned : reversePath(planned);
-            void api.webWalk.walkPath(path).then((result: boolean) => {
+            void api.webWalk.walkPath(planned).then((result: boolean) => {
                 if (result) {
                     api.bot.stop();
                 }
