@@ -1,11 +1,3 @@
-// src/runtime/actions.ts
-var MiniMenuAction = {
-  USEHELD_ONLOC: 810,
-  USEHELD_ONHELD: 398,
-  IF_BUTTON: 231,
-  USEHELD_START: 102
-};
-
 // src/runtime/Timer.ts
 class Timer {
   static systemTimer;
@@ -60,38 +52,19 @@ class Timer {
   }
 }
 
-// src/runtime/Utility.ts
-class Utility {
-  static getDistance(x1, z1, x2, z2) {
-    return Math.sqrt(Math.pow(Math.abs(x1 - x2), 2) + Math.pow(Math.abs(z1 - z2), 2));
-  }
-  static includes(arr, v) {
-    const v2 = Number(v);
-    if (Number.isNaN(v2)) {
-      throw "Parse error " + v + " -> " + v2;
-    }
-    for (let i = 0;i < arr.length; ++i) {
-      const arri2 = Number(arr[i]);
-      if (Number.isNaN(arri2)) {
-        throw "Parse error " + arr[i] + " -> " + arri2;
-      }
-      if (arri2 === v2) {
-        return true;
-      }
-    }
-    return false;
-  }
-}
-
 // src/runtime/BotScript.ts
 class BotScript {
   name;
+  author;
+  version;
   isSystemScript;
   isDebugScript;
-  constructor(name, isSystemScript, isDebugScript = false) {
+  constructor(name, isSystemScript, metadata) {
     this.name = name;
+    this.author = metadata.author;
+    this.version = metadata.version;
     this.isSystemScript = isSystemScript;
-    this.isDebugScript = isDebugScript;
+    this.isDebugScript = metadata.isDebugScript ?? false;
   }
   start(_bot) {}
   update(_bot) {}
@@ -150,19 +123,11 @@ function getChecked(id) {
   return document.getElementById(id)?.checked ?? false;
 }
 function findPickableFlax(api, anchor, anchorMaxDist) {
-  const candidates = api.worldObject.getById([ID_FLAX_GROUND]);
+  const candidates = api.worldObject.getNear(anchor[0], anchor[1], anchorMaxDist, [ID_FLAX_GROUND]);
   let best = null;
   let bestSteps = Number.POSITIVE_INFINITY;
-  const baseX = api.surface.sceneBaseTileX;
-  const baseZ = api.surface.sceneBaseTileZ;
   for (let i = 0;i < candidates.length; i++) {
     const wo = candidates[i];
-    const wx = wo.x + baseX;
-    const wz = wo.z + baseZ;
-    const da = Utility.getDistance(wx, wz, anchor[0], anchor[1]);
-    if (da > anchorMaxDist) {
-      continue;
-    }
     const steps = api.worldObject.getPathfindSteps(wo);
     if (steps < 0 || steps > FLAX_PATHFIND_MAX_STEPS) {
       continue;
@@ -173,53 +138,6 @@ function findPickableFlax(api, anchor, anchorMaxDist) {
     }
   }
   return best;
-}
-function findWorldObjectNearTile(api, ids, worldX, worldZ, maxDist = WORLD_OBJECT_TILE_TOLERANCE) {
-  const baseX = api.surface.sceneBaseTileX;
-  const baseZ = api.surface.sceneBaseTileZ;
-  const candidates = api.worldObject.getById(ids);
-  let best = null;
-  let bestDist = maxDist + 1;
-  for (let i = 0;i < candidates.length; i++) {
-    const wo = candidates[i];
-    const wx = wo.x + baseX;
-    const wz = wo.z + baseZ;
-    const d = Utility.getDistance(wx, wz, worldX, worldZ);
-    if (d <= maxDist && d < bestDist) {
-      bestDist = d;
-      best = wo;
-    }
-  }
-  return best;
-}
-function findReachableWorldObjectNearTile(api, ids, worldX, worldZ, maxDist = WORLD_OBJECT_TILE_TOLERANCE, maxSteps = FLAX_PATHFIND_MAX_STEPS) {
-  const baseX = api.surface.sceneBaseTileX;
-  const baseZ = api.surface.sceneBaseTileZ;
-  const candidates = api.worldObject.getById(ids);
-  let best = null;
-  let bestSteps = Number.POSITIVE_INFINITY;
-  for (let i = 0;i < candidates.length; i++) {
-    const wo = candidates[i];
-    const wx = wo.x + baseX;
-    const wz = wo.z + baseZ;
-    if (Utility.getDistance(wx, wz, worldX, worldZ) > maxDist) {
-      continue;
-    }
-    const steps = api.worldObject.getPathfindSteps(wo);
-    if (steps < 0 || steps > maxSteps) {
-      continue;
-    }
-    if (steps < bestSteps) {
-      bestSteps = steps;
-      best = wo;
-    }
-  }
-  return best;
-}
-function useItemOnWorldObject(api, item, wo) {
-  const lx = wo.typecode & 127;
-  const lz = wo.typecode >> 7 & 127;
-  api.doAction(MiniMenuAction.USEHELD_ONLOC, wo.typecode, lx, lz);
 }
 
 class AutoFlaxPicker extends BotScript {
@@ -253,7 +171,7 @@ class AutoFlaxPicker extends BotScript {
     }
   ];
   constructor(spotIndex = 0, spinEnabled = false) {
-    super("AutoFlaxPicker", false);
+    super("AutoFlaxPicker", false, { author: "j", version: "1.0.0" });
     this.timer = new Timer;
     this.spinEnabled = spinEnabled;
     const i = Math.max(0, Math.min(spotIndex, AutoFlaxPicker.spots.length - 1));
@@ -308,7 +226,7 @@ class AutoFlaxPicker extends BotScript {
     if (!this.isNearSpinDoor(api)) {
       return false;
     }
-    const closedDoor = findWorldObjectNearTile(api, [ID_DOOR_CLOSED], SEERS_SPIN_DOOR[0], SEERS_SPIN_DOOR[1]);
+    const closedDoor = api.worldObject.getNear(SEERS_SPIN_DOOR[0], SEERS_SPIN_DOOR[1], WORLD_OBJECT_TILE_TOLERANCE, [ID_DOOR_CLOSED])[0] ?? null;
     if (!closedDoor) {
       return false;
     }
@@ -333,7 +251,7 @@ class AutoFlaxPicker extends BotScript {
     }
     this.pendingSpinWheel = wheel;
     this.spinUseStep = "need_use_on_wheel";
-    api.doAction(MiniMenuAction.USEHELD_START, flax.id, flax.slot, flax.interfaceId);
+    flax.use();
     this.timer.setTimer(TIMER_SPIN_USE, 120);
     this.timer.setTimer(TIMER_GAME_INTERACT, 400);
     return true;
@@ -348,7 +266,7 @@ class AutoFlaxPicker extends BotScript {
       if (wheel) {
         const flax = api.inventory.getItemById(ID_FLAX);
         if (flax) {
-          useItemOnWorldObject(api, flax, wheel);
+          wheel.useItem(flax);
         }
       }
       this.spinUseStep = "idle";
@@ -362,13 +280,13 @@ class AutoFlaxPicker extends BotScript {
         if (api.player.isAnimating()) {
           return true;
         }
-        const wheel = findReachableWorldObjectNearTile(api, [ID_SPINNING_WHEEL], SEERS_SPIN_WHEEL[0], SEERS_SPIN_WHEEL[1]) ?? api.worldObject.getNearestByIdPath([ID_SPINNING_WHEEL], FLAX_PATHFIND_MAX_STEPS);
+        const wheel = api.worldObject.getNear(SEERS_SPIN_WHEEL[0], SEERS_SPIN_WHEEL[1], WORLD_OBJECT_TILE_TOLERANCE, [ID_SPINNING_WHEEL]).find((wo) => wo.isReachable(FLAX_PATHFIND_MAX_STEPS)) ?? api.worldObject.getNearestByIdPath([ID_SPINNING_WHEEL], FLAX_PATHFIND_MAX_STEPS);
         if (wheel) {
           this.beginSpinFlax(api, wheel);
         }
         return true;
       }
-      const ladderDown = findReachableWorldObjectNearTile(api, [ID_LADDER_DOWN], SEERS_SPIN_LADDER[0], SEERS_SPIN_LADDER[1]) ?? api.worldObject.getNearestByIdPath([ID_LADDER_DOWN], FLAX_PATHFIND_MAX_STEPS);
+      const ladderDown = api.worldObject.getNear(SEERS_SPIN_LADDER[0], SEERS_SPIN_LADDER[1], WORLD_OBJECT_TILE_TOLERANCE, [ID_LADDER_DOWN]).find((wo) => wo.isReachable(FLAX_PATHFIND_MAX_STEPS)) ?? api.worldObject.getNearestByIdPath([ID_LADDER_DOWN], FLAX_PATHFIND_MAX_STEPS);
       const ladderDist = api.world.distanceTo(SEERS_SPIN_LADDER[0], SEERS_SPIN_LADDER[1]);
       if (ladderDist > 2 && this.canWalk(api) && !api.world.hasPath()) {
         await this.safeWalkPath(api, [[SEERS_SPIN_LADDER[0], SEERS_SPIN_LADDER[1]]], false);
@@ -394,7 +312,7 @@ class AutoFlaxPicker extends BotScript {
     if (this.openSpinHouseDoorIfClosed(api)) {
       return true;
     }
-    const ladderUp = findWorldObjectNearTile(api, [ID_LADDER_UP], SEERS_SPIN_LADDER[0], SEERS_SPIN_LADDER[1]);
+    const ladderUp = api.worldObject.getNear(SEERS_SPIN_LADDER[0], SEERS_SPIN_LADDER[1], WORLD_OBJECT_TILE_TOLERANCE, [ID_LADDER_UP])[0] ?? null;
     if (ladderUp && api.world.distanceTo(SEERS_SPIN_LADDER[0], SEERS_SPIN_LADDER[1]) <= 6) {
       this.timer.setTimer(TIMER_GAME_INTERACT, 1600);
       ladderUp.interact(LADDER_OP);
@@ -515,4 +433,4 @@ export {
   AutoFlaxPicker as default
 };
 
-//# debugId=CB79D60D1DD4F21B64756E2164756E21
+//# debugId=68F5429562EB3A3F64756E2164756E21

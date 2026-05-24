@@ -71,12 +71,16 @@ var HUB_ROUTE_OPTIONS = [
 // src/runtime/BotScript.ts
 class BotScript {
   name;
+  author;
+  version;
   isSystemScript;
   isDebugScript;
-  constructor(name, isSystemScript, isDebugScript = false) {
+  constructor(name, isSystemScript, metadata) {
     this.name = name;
+    this.author = metadata.author;
+    this.version = metadata.version;
     this.isSystemScript = isSystemScript;
-    this.isDebugScript = isDebugScript;
+    this.isDebugScript = metadata.isDebugScript ?? false;
   }
   start(_bot) {}
   update(_bot) {}
@@ -123,7 +127,7 @@ class AutoWalker extends BotScript {
   toNode;
   traverse;
   constructor(routeIndex = 0, traverse = true) {
-    super("AutoWalker", false);
+    super("AutoWalker", false, { author: "j", version: "1.0.0" });
     this.timer = new Timer;
     const route = HUB_ROUTE_OPTIONS[routeIndex] ?? HUB_ROUTE_OPTIONS[0];
     this.fromNode = route.from;
@@ -195,4 +199,4 @@ export {
   AutoWalker as default
 };
 
-//# debugId=F9E11A13F3AD02CA64756E2164756E21
+//# debugId=DE5C1FF083A4228564756E2164756E21

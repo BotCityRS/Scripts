@@ -55,12 +55,16 @@ class Timer {
 // src/runtime/BotScript.ts
 class BotScript {
   name;
+  author;
+  version;
   isSystemScript;
   isDebugScript;
-  constructor(name, isSystemScript, isDebugScript = false) {
+  constructor(name, isSystemScript, metadata) {
     this.name = name;
+    this.author = metadata.author;
+    this.version = metadata.version;
     this.isSystemScript = isSystemScript;
-    this.isDebugScript = isDebugScript;
+    this.isDebugScript = metadata.isDebugScript ?? false;
   }
   start(_bot) {}
   update(_bot) {}
@@ -166,7 +170,7 @@ class AutoFisher extends BotScript {
   }];
   location;
   constructor(locationId = 0) {
-    super("AutoFisher", false);
+    super("AutoFisher", false, { author: "j", version: "1.0.0" });
     this.timer = new Timer;
     this.location = AutoFisher.locations[locationId];
     this.timer.defineTimer("TIMER_GAME_INTERACT", TIMER_GAME_INTERACT);
@@ -251,4 +255,4 @@ export {
   AutoFisher as default
 };
 
-//# debugId=F0527CAE8BC2DA8864756E2164756E21
+//# debugId=1EFBBBC1305F9D6E64756E2164756E21

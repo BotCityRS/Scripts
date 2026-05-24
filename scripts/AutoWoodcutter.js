@@ -1,11 +1,3 @@
-// src/runtime/actions.ts
-var MiniMenuAction = {
-  USEHELD_ONLOC: 810,
-  USEHELD_ONHELD: 398,
-  IF_BUTTON: 231,
-  USEHELD_START: 102
-};
-
 // src/runtime/fletchCutLogsDialogCom.ts
 var ID_LOGS = 1511;
 var MULTIOBJ3_CLOSE_SHAFT = 2800;
@@ -115,12 +107,16 @@ class Utility {
 // src/runtime/BotScript.ts
 class BotScript {
   name;
+  author;
+  version;
   isSystemScript;
   isDebugScript;
-  constructor(name, isSystemScript, isDebugScript = false) {
+  constructor(name, isSystemScript, metadata) {
     this.name = name;
+    this.author = metadata.author;
+    this.version = metadata.version;
     this.isSystemScript = isSystemScript;
-    this.isDebugScript = isDebugScript;
+    this.isDebugScript = metadata.isDebugScript ?? false;
   }
   start(_bot) {}
   update(_bot) {}
@@ -711,7 +707,7 @@ class AutoWoodcutter extends BotScript {
   ];
   static keepWhenBanking = [ID_KNIFE, ID_TINDERBOX, ...AXE_IDS];
   constructor(spotIndex = 0, bankEnabled = false, treeKindIndex = 0, logAction = "none", maxRadius = null) {
-    super("AutoWoodcutter", false);
+    super("AutoWoodcutter", false, { author: "j", version: "1.0.0" });
     this.timer = new Timer;
     this.bankEnabled = bankEnabled;
     this.logAction = logAction;
@@ -916,7 +912,7 @@ class AutoWoodcutter extends BotScript {
       dialogCom: com,
       logAction
     });
-    api.doAction(MiniMenuAction.USEHELD_START, knife.id, knife.slot, knife.interfaceId);
+    knife.use();
     this.timer.setTimer(TIMER_KNIFE_USE, 120);
     this.timer.setTimer(TIMER_GAME_INTERACT, 400);
     return true;
@@ -938,7 +934,7 @@ class AutoWoodcutter extends BotScript {
       logId,
       logSlot: log.slot
     });
-    api.doAction(MiniMenuAction.USEHELD_START, tinder.id, tinder.slot, tinder.interfaceId);
+    tinder.use();
     this.timer.setTimer(TIMER_TINDER_USE, 120);
     this.timer.setTimer(TIMER_GAME_INTERACT, 400);
     return true;
@@ -952,7 +948,7 @@ class AutoWoodcutter extends BotScript {
       this.pendingDialogCom = null;
       if (com !== null) {
         logGameInteraction(api, "choose fletching dialog option", { com });
-        api.doAction(MiniMenuAction.IF_BUTTON, 0, 0, com);
+        api.interface.clickComponent(com);
       }
       this.timer.setTimer(TIMER_GAME_INTERACT, 2200);
       return;
@@ -1002,13 +998,14 @@ class AutoWoodcutter extends BotScript {
           break;
         }
       }
-      if (log) {
+      const knife = api.inventory.getItemById(ID_KNIFE);
+      if (knife && log) {
         logGameInteraction(api, "use knife on log", {
           logId: log.id,
           logSlot: log.slot,
           interfaceId: log.interfaceId
         });
-        api.doAction(MiniMenuAction.USEHELD_ONHELD, log.id, log.slot, log.interfaceId);
+        knife.useOnItem(log);
       }
       this.knifeUseStep = "idle";
       if (this.pendingDialogCom !== null) {
@@ -1019,7 +1016,8 @@ class AutoWoodcutter extends BotScript {
     }
     if (this.tinderUseStep === "need_use_on_log" && !this.timer.hasTimer(TIMER_TINDER_USE)) {
       const log = this.pendingBurnLogId !== null ? api.inventory.getItemById(this.pendingBurnLogId) : null;
-      if (log) {
+      const tinder = api.inventory.getItemById(ID_TINDERBOX);
+      if (tinder && log) {
         this.burnFireTileX = api.player.getLocalX();
         this.burnFireTileZ = api.player.getLocalZ();
         logGameInteraction(api, "use tinderbox on log", {
@@ -1029,7 +1027,7 @@ class AutoWoodcutter extends BotScript {
           fireTileX: this.burnFireTileX,
           fireTileZ: this.burnFireTileZ
         });
-        api.doAction(MiniMenuAction.USEHELD_ONHELD, log.id, log.slot, log.interfaceId);
+        tinder.useOnItem(log);
       }
       this.tinderUseStep = "awaiting_fire";
       this.burnWaitStartedAt = Date.now();
@@ -1154,4 +1152,4 @@ export {
   AutoWoodcutter as default
 };
 
-//# debugId=CD66CFB86125346364756E2164756E21
+//# debugId=A6BFCD45784E03AF64756E2164756E21

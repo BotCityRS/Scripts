@@ -55,12 +55,16 @@ class Timer {
 // src/runtime/BotScript.ts
 class BotScript {
   name;
+  author;
+  version;
   isSystemScript;
   isDebugScript;
-  constructor(name, isSystemScript, isDebugScript = false) {
+  constructor(name, isSystemScript, metadata) {
     this.name = name;
+    this.author = metadata.author;
+    this.version = metadata.version;
     this.isSystemScript = isSystemScript;
-    this.isDebugScript = isDebugScript;
+    this.isDebugScript = metadata.isDebugScript ?? false;
   }
   start(_bot) {}
   update(_bot) {}
@@ -99,7 +103,7 @@ class LumbyThievSuicide extends BotScript {
   timer;
   pickupCoins;
   constructor(pickupCoins = true) {
-    super("LumbyThievSuicide", false);
+    super("LumbyThievSuicide", false, { author: "j", version: "1.0.0" });
     this.timer = new Timer;
     this.pickupCoins = pickupCoins;
     this.timer.defineTimer("TIMER_GAME_INTERACT", TIMER_GAME_INTERACT);
@@ -160,4 +164,4 @@ export {
   LumbyThievSuicide as default
 };
 
-//# debugId=0F101D9B869511C564756E2164756E21
+//# debugId=E4C22BE59A43BB8164756E2164756E21

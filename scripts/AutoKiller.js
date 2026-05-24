@@ -55,12 +55,16 @@ class Timer {
 // src/runtime/BotScript.ts
 class BotScript {
   name;
+  author;
+  version;
   isSystemScript;
   isDebugScript;
-  constructor(name, isSystemScript, isDebugScript = false) {
+  constructor(name, isSystemScript, metadata) {
     this.name = name;
+    this.author = metadata.author;
+    this.version = metadata.version;
     this.isSystemScript = isSystemScript;
-    this.isDebugScript = isDebugScript;
+    this.isDebugScript = metadata.isDebugScript ?? false;
   }
   start(_bot) {}
   update(_bot) {}
@@ -114,7 +118,7 @@ class AutoKiller extends BotScript {
   buryBones;
   timer;
   constructor(attackStyle = 0, npcIDs = [41], groundItemIDs = [314, 526], buryBones = true) {
-    super("AutoKiller", false);
+    super("AutoKiller", false, { author: "j", version: "1.0.0" });
     this.attackStyle = attackStyle;
     this.npcIDs = npcIDs;
     this.groundItemIDs = groundItemIDs;
@@ -227,4 +231,4 @@ export {
   AutoKiller as default
 };
 
-//# debugId=C2A138A27357814864756E2164756E21
+//# debugId=931B12D28FBE862664756E2164756E21

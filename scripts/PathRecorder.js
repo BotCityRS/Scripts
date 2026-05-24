@@ -1,12 +1,16 @@
 // src/runtime/BotScript.ts
 class BotScript {
   name;
+  author;
+  version;
   isSystemScript;
   isDebugScript;
-  constructor(name, isSystemScript, isDebugScript = false) {
+  constructor(name, isSystemScript, metadata) {
     this.name = name;
+    this.author = metadata.author;
+    this.version = metadata.version;
     this.isSystemScript = isSystemScript;
-    this.isDebugScript = isDebugScript;
+    this.isDebugScript = metadata.isDebugScript ?? false;
   }
   start(_bot) {}
   update(_bot) {}
@@ -46,7 +50,7 @@ class PathRecorder extends BotScript {
   fromId;
   toId;
   constructor(fromId = "hub_lumbridge", toId = "bank_al_kharid") {
-    super("PathRecorder", false, true);
+    super("PathRecorder", false, { author: "j", version: "1.0.0", isDebugScript: true });
     this.fromId = fromId;
     this.toId = toId;
   }
@@ -174,4 +178,4 @@ export {
   PathRecorder as default
 };
 
-//# debugId=AD3F3328134C7EE264756E2164756E21
+//# debugId=BC8F98B740F4EDF864756E2164756E21
