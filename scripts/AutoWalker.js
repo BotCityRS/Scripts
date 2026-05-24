@@ -53,9 +53,6 @@ class Timer {
 }
 
 // src/runtime/walk.ts
-function reversePath(path) {
-  return path.map((n) => [n[0], n[1]]).reverse();
-}
 var HUB_ROUTE_OPTIONS = [
   { label: "Draynor <-> Lumbridge", from: "hub_draynor", to: "hub_lumbridge" },
   { label: "Draynor <-> Falador", from: "hub_draynor", to: "hub_falador" },
@@ -182,8 +179,7 @@ class AutoWalker extends BotScript {
         api.bot.log("WARN", "AutoWalker", "no planned route", { from, to });
         return;
       }
-      const path = this.traverse ? planned : reversePath(planned);
-      api.webWalk.walkPath(path).then((result) => {
+      api.webWalk.walkPath(planned).then((result) => {
         if (result) {
           api.bot.stop();
         }
@@ -199,4 +195,4 @@ export {
   AutoWalker as default
 };
 
-//# debugId=A190CD442F18F37964756E2164756E21
+//# debugId=F9E11A13F3AD02CA64756E2164756E21
