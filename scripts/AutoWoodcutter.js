@@ -345,6 +345,12 @@ function findChoppableTree(api, treeKind, anchor, anchorMaxDist) {
   }
   return best;
 }
+function getWoodSpotTreeAnchor(spot) {
+  return spot.pathBankToTrees[spot.pathBankToTrees.length - 1];
+}
+function reverseWoodSpotPath(spot) {
+  return spot.pathBankToTrees.map(([x, z]) => [x, z]).reverse();
+}
 function fletchFlagsForAction(action) {
   return {
     cutShafts: action === "shafts",
@@ -527,112 +533,112 @@ class AutoWoodcutter extends BotScript {
     {
       label: "Draynor tree",
       treeKind: "normal",
-      anchor: [3088, 3235],
+      pathBankToTrees: [[3087, 3238], [3088, 3235]],
       walkNodeId: "wc_draynor_tree",
       bankNodeId: "bank_draynor"
     },
     {
       label: "Draynor oak",
       treeKind: "oak",
-      anchor: [3083, 3250],
+      pathBankToTrees: [[3087, 3238], [3083, 3250]],
       walkNodeId: "wc_draynor_oak",
       bankNodeId: "bank_draynor"
     },
     {
       label: "Draynor willow",
       treeKind: "willow",
-      anchor: [3084, 3230],
+      pathBankToTrees: [[3087, 3238], [3084, 3230]],
       walkNodeId: "wc_draynor_willow",
       bankNodeId: "bank_draynor"
     },
     {
       label: "Varrock east tree",
       treeKind: "normal",
-      anchor: [3289, 3428],
+      pathBankToTrees: [[3255, 3420], [3275, 3425], [3289, 3428]],
       walkNodeId: "wc_varrock_east_tree",
       bankNodeId: "bank_varrock_east"
     },
     {
       label: "Varrock east oak",
       treeKind: "oak",
-      anchor: [3275, 3426],
+      pathBankToTrees: [[3255, 3420], [3262, 3423], [3275, 3426]],
       walkNodeId: "wc_varrock_east_oak",
       bankNodeId: "bank_varrock_east"
     },
     {
       label: "Varrock north yew",
       treeKind: "yew",
-      anchor: [3205, 3502],
+      pathBankToTrees: [[3185, 3440], [3185, 3448], [3194, 3462], [3200, 3484], [3205, 3502]],
       walkNodeId: "wc_varrock_north_yew",
       bankNodeId: "bank_varrock_west"
     },
     {
       label: "Falador south yew",
       treeKind: "yew",
-      anchor: [2997, 3312],
+      pathBankToTrees: [[3011, 3341], [3005, 3330], [2997, 3312]],
       walkNodeId: "wc_falador_south_yew",
       bankNodeId: "bank_falador_east"
     },
     {
       label: "Catherby oak",
       treeKind: "oak",
-      anchor: [2788, 3440],
+      pathBankToTrees: [[2809, 3440], [2788, 3440]],
       walkNodeId: "wc_catherby_oak",
       bankNodeId: "bank_catherby"
     },
     {
       label: "Catherby willow",
       treeKind: "willow",
-      anchor: [2783, 3428],
+      pathBankToTrees: [[2809, 3440], [2795, 3435], [2783, 3428]],
       walkNodeId: "wc_catherby_willow",
       bankNodeId: "bank_catherby"
     },
     {
       label: "Catherby yew",
       treeKind: "yew",
-      anchor: [2760, 3434],
+      pathBankToTrees: [[2809, 3440], [2784, 3437], [2760, 3434]],
       walkNodeId: "wc_catherby_yew",
       bankNodeId: "bank_catherby"
     },
     {
       label: "Seers maple",
       treeKind: "maple",
-      anchor: [2720, 3475],
+      pathBankToTrees: [[2727, 3493], [2720, 3475]],
       walkNodeId: "wc_seers_maple",
       bankNodeId: "bank_seers"
     },
     {
       label: "Seers willow",
       treeKind: "willow",
-      anchor: [2710, 3504],
+      pathBankToTrees: [[2727, 3493], [2710, 3504]],
       walkNodeId: "wc_seers_willow",
       bankNodeId: "bank_seers"
     },
     {
       label: "Seers yew",
       treeKind: "yew",
-      anchor: [2707, 3465],
+      pathBankToTrees: [[2727, 3493], [2718, 3478], [2707, 3465]],
       walkNodeId: "wc_seers_yew",
       bankNodeId: "bank_seers"
     },
     {
       label: "Edgeville yew",
       treeKind: "yew",
-      anchor: [3221, 3504],
+      pathBankToTrees: [[3093, 3490], [3093, 3480]],
       walkNodeId: "wc_edgeville_yew",
       bankNodeId: "bank_edgeville"
     },
     {
       label: "Seers magic",
       treeKind: "magic",
-      anchor: [2705, 3396],
+      pathBankToTrees: [[2727, 3493], [2705, 3396]],
       walkNodeId: "wc_seers_magic",
       bankNodeId: "bank_seers"
     },
     {
       label: "Seers magic north",
       treeKind: "magic",
-      anchor: [2692, 3425],
+      pathBankToTrees: [[2727, 3493], [2704, 3454], [2692, 3425]],
       anchorMaxDist: 12,
       walkNodeId: "wc_seers_magic_north",
       bankNodeId: "bank_seers"
@@ -640,7 +646,7 @@ class AutoWoodcutter extends BotScript {
     {
       label: "Gnome Stronghold magic west",
       treeKind: "magic",
-      anchor: [2371, 3426],
+      pathBankToTrees: [[2371, 3426]],
       anchorMaxDist: 10,
       walkNodeId: "wc_gnome_magic_west",
       bankNodeId: "bank_gnome_stronghold"
@@ -648,7 +654,7 @@ class AutoWoodcutter extends BotScript {
     {
       label: "Gnome Stronghold magic central",
       treeKind: "magic",
-      anchor: [2432, 3410],
+      pathBankToTrees: [[2432, 3410]],
       anchorMaxDist: 10,
       walkNodeId: "wc_gnome_magic_central",
       bankNodeId: "bank_gnome_stronghold"
@@ -656,7 +662,7 @@ class AutoWoodcutter extends BotScript {
     {
       label: "Gnome Stronghold magic east",
       treeKind: "magic",
-      anchor: [2490, 3414],
+      pathBankToTrees: [[2490, 3414]],
       anchorMaxDist: 10,
       walkNodeId: "wc_gnome_magic_east",
       bankNodeId: "bank_gnome_stronghold"
@@ -707,7 +713,7 @@ class AutoWoodcutter extends BotScript {
   ];
   static keepWhenBanking = [ID_KNIFE, ID_TINDERBOX, ...AXE_IDS];
   constructor(spotIndex = 0, bankEnabled = false, treeKindIndex = 0, logAction = "none", maxRadius = null) {
-    super("AutoWoodcutter", false, { author: "j", version: "1.0.0" });
+    super("AutoWoodcutter", false, { author: "j", version: "1.1.0" });
     this.timer = new Timer;
     this.bankEnabled = bankEnabled;
     this.logAction = logAction;
@@ -1091,8 +1097,21 @@ class AutoWoodcutter extends BotScript {
         this.timer.setTimer(TIMER_GAME_INTERACT, 1600);
         logGameInteraction(api, "open bank", { bankNodeId: this.spot.bankNodeId });
         if (!api.bank.open()) {
-          logGameInteraction(api, "walk to bank node", { bankNodeId: this.spot.bankNodeId });
-          await api.webWalk.walkToNode(this.spot.bankNodeId);
+          const pathToBank = this.spot.pathBankToTrees.length > 1 ? reverseWoodSpotPath(this.spot) : null;
+          if (pathToBank) {
+            logGameInteraction(api, "walk path to bank", {
+              bankNodeId: this.spot.bankNodeId,
+              pathToBank
+            });
+            const walkedPath = await api.webWalk.walkPath(pathToBank);
+            if (!walkedPath) {
+              logGameInteraction(api, "walk to bank node", { bankNodeId: this.spot.bankNodeId });
+              await api.webWalk.walkToNode(this.spot.bankNodeId);
+            }
+          } else {
+            logGameInteraction(api, "walk to bank node", { bankNodeId: this.spot.bankNodeId });
+            await api.webWalk.walkToNode(this.spot.bankNodeId);
+          }
         }
         return;
       }
@@ -1119,7 +1138,8 @@ class AutoWoodcutter extends BotScript {
       return;
     }
     this.timer.setTimer(TIMER_GAME_INTERACT, 2000);
-    const anchor = this.bankEnabled && this.spot ? this.spot.anchor : this.getNoBankRadiusAnchor(api);
+    const spotTreeAnchor = this.bankEnabled && this.spot ? getWoodSpotTreeAnchor(this.spot) : null;
+    const anchor = spotTreeAnchor ?? this.getNoBankRadiusAnchor(api);
     const anchorMaxDist = this.bankEnabled && this.spot ? this.spot.anchorMaxDist ?? 14 : this.maxRadius;
     const chopTreeKind = this.bankEnabled && this.spot ? this.spot.treeKind : effectiveTreeKind;
     const tree = findChoppableTree(api, chopTreeKind, anchor, anchorMaxDist);
@@ -1142,9 +1162,16 @@ class AutoWoodcutter extends BotScript {
       });
       tree.interact(0);
       this.lastWoodcutActivityAt = Date.now();
-    } else if (this.bankEnabled && this.spot && api.world.distanceTo(this.spot.anchor[0], this.spot.anchor[1]) > 8) {
-      logGameInteraction(api, "walk to woodcutting node", { walkNodeId: this.spot.walkNodeId });
-      await api.webWalk.walkToNode(this.spot.walkNodeId);
+    } else if (this.bankEnabled && this.spot && spotTreeAnchor && api.world.distanceTo(spotTreeAnchor[0], spotTreeAnchor[1]) > 8) {
+      logGameInteraction(api, "walk path to trees", {
+        walkNodeId: this.spot.walkNodeId,
+        pathBankToTrees: this.spot.pathBankToTrees
+      });
+      const walkedPath = await api.webWalk.walkPath(this.spot.pathBankToTrees);
+      if (!walkedPath) {
+        logGameInteraction(api, "walk to woodcutting node", { walkNodeId: this.spot.walkNodeId });
+        await api.webWalk.walkToNode(this.spot.walkNodeId);
+      }
     }
   }
 }
@@ -1152,4 +1179,4 @@ export {
   AutoWoodcutter as default
 };
 
-//# debugId=A6BFCD45784E03AF64756E2164756E21
+//# debugId=C5378F54CD6E470064756E2164756E21
